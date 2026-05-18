@@ -17,7 +17,7 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     //almost identical to visitor1
     @Override
     public String visit(MainClass n,Void argu)throws Exception{
-        String classname=n.f1.accept(this,null);
+        String classname = n.f1.f0.toString();
         currentClass=classname;
 
         return null;
@@ -25,7 +25,7 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     @Override
     public String visit(ClassDeclaration n,Void argu) throws Exception{
         
-        String classname=n.f1.accept(this,null);
+        String classname = n.f1.f0.toString();
         currentClass=classname;
         n.f4.accept(this,null);
 
@@ -33,9 +33,9 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     }
     @Override
     public String visit(ClassExtendsDeclaration n,Void argu) throws Exception{
-        String classname=n.f1.accept(this,null);
+        String classname = n.f1.f0.toString();
+        String parentName = n.f3.f0.toString();
         currentClass=classname;
-        String parentName=n.f3.accept(this,null);
         if (!symbolTable.classExists(parentName))
             throw new Exception("Class '" + parentName+"'doesn't exist");
         n.f6.accept(this,null);
@@ -44,8 +44,8 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     }
     @Override
     public String visit(MethodDeclaration n,Void argu) throws Exception{
-        String type=n.f1.accept(this,null);
-        String name = n.f2.accept(this,null);
+        String type = n.f1.accept(this, null);
+        String name = n.f2.f0.toString();
         //we're inside this method
         currentMethod=name;
         //visit statement in method
@@ -139,7 +139,7 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     }
     @Override
     public String visit(AllocationExpression n,Void argu)throws Exception{
-        String classname=n.f1.accept(this,null);
+        String classname = n.f1.f0.toString();
         if(!symbolTable.classExists(classname))
             throw new Exception(classname+"doesn't exist");
         return classname;
