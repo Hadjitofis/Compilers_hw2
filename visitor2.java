@@ -9,7 +9,7 @@ public class visitor2 extends GJDepthFirst<String, Void>{
 
     //our position
     private String currentClass;
-    private String CurrentMethod;
+    private String currentMethod;
 
     public visitor2(SymbolTable t){
         this.symbolTable=t;
@@ -130,12 +130,137 @@ public class visitor2 extends GJDepthFirst<String, Void>{
             throw new Exception("should be int");
         return "int";
     }
-        @Override
+    @Override
     public String visit(ArrayLength n,Void argu)throws Exception{
         String array = n.f0.accept(this,null);
-        if(!array.equals(|"int[]"))
+        if(!array.equals("int[]"))
             throw new Exception("should be on int[]");
         return "int";
     }
+    @Override
+    public String visit(AllocationExpression n,Void argu)throws Exception{
+        String classname=n.f1.accept(this,null);
+        if(!symbolTable.classExists(classname))
+            throw new Exception(classname+"doesn't exist");
+        return classname;
+    }
     
+    @Override
+    public String visit(ArrayAllocationExpression n,Void argu)throws Exception{
+        return n.f0.accept(this,argu);
+    }
+    @Override
+    public String visit(IntegerArrayAllocationExpression n,Void argu)throws Exception{
+        String size=n.f3.accept(this,null);
+        if(!size.equals("int"))
+            throw new Exception("size must be int");
+        return "int[]";
+    }
+    @Override
+    public String visit(IfStatement n,Void argu) throws Exception{
+        String condition =n.f2.accept(this,null);
+        if(!condition.equals("boolean"))
+            throw new Exception("if must be bool");
+            n.f4.accept(this,null);
+            n.f6.accept(this,null);
+            return null;
+    }
+    @Override
+    public String visit(WhileStatement n,Void argu) throws Exception{
+        String condition =n.f2.accept(this,null);
+        if(!condition.equals("boolean"))
+            throw new Exception("while must be bool");
+            n.f4.accept(this,null);
+            return null;
+    }
+    @Override
+    public String visit(PrintStatement n,Void argu)throws Exception{
+        String expression=n.f2.accept(this,null);
+        if(!expression.equals("int"))
+            throw new Exception("expression must be int");
+        return null;
+    }
+    @Override
+    public String visit(AssignmentStatement n,Void argu)throws Exception{
+        String var=n.f0.accept(this,null);
+        String expr=n.f2.accept(this,null);
+        if(!symbolTable.inheritsFrom(expr,var))
+            throw new Exception("wrong assignment");
+        return null;
+    }
+    @Override
+    public String visit(ArrayAssignmentStatement n,Void argu)throws Exception{
+        String var=n.f0.accept(this,null);
+        String index=n.f2.accept(this,null);
+        String value=n.f5.accept(this,null);
+        if(!var.equals("int[]")||!index.equals("int")||!value.equals("int"))
+            throw new Exception("all should be int");
+        return null;
+    }
+
+    @Override
+    public String visit(Identifier n,Void argu)throws Exception{
+        String name = n.f0.toString();
+        //look in current method vars and parameters
+        if(currentMethod!=null){
+            ClassInfo ci=symbolTable.getClass(currentClass);
+            MethodInfo mi=ci.MethodName(currentMethod);
+            //search for variables and parameters
+            String type=mi.searchvar(name);
+            if(type!=null)
+                return type;
+        }
+        //now look in fields
+        ClassInfo classi=symbolTable.getClass(currentClass);
+        while(classi!=null){
+            String type=classi.getFieldType(name);
+            if(type!=null)
+                return type;
+            //move to parent
+            if (classi.parent != null)
+                classi = symbolTable.getClass(classi.parent);
+            else 
+                classi = null;
+            
+            }
+        throw new Exception("Variable not declared");
+    }
+    @Override
+    public String visit(MessageSend n, Void argu) throws Exception{
+        //get object type
+        String objectType=n.f0.accept(this,null);
+        //get method name
+        String methodName=n.f2.f0.toString();
+        List<String> argTypes=new ArrayList<>();
+            if(n.f4.present()){
+                syntaxtree.ExpressionList EL=(syntaxtree.ExpressionList) n.f4.node;
+                argTypes.add(EL.f0.accept(this,null));
+                for(syntaxtree.Node node:EL.f1.f0.nodes){
+                    syntaxtree.ExpressionTerm et=(syntaxtree.ExpressionTerm) node;
+                    argTypes.add(et.f1.accept(this, null));
+                }
+            }
+        
+        //find the method from the inheritance list
+        ClassInfo ci=symbolTable.getClass(objectType);
+        MethodInfo mi=null;
+        while(ci!=null){
+            mi=ci.getMethod(methodName,argTypes.size());
+            if(mi!=null)
+                break;
+            if(ci.parent!=null)
+                ci=symbolTable.getClass(ci.parent);
+            else
+                ci=null;
+        }
+            if(mi==null)
+                throw new Exception("method '"+methodName+"'not found");
+            //check if arguments type match
+            for(int i=0;i<argTypes.size();i++)
+            {
+                if(!symbolTable.inheritsFrom(argTypes.get(i),mi.paramTypes.get(i)))
+                    throw new Exception("Arg type doesnt match");
+            }
+            return mi.returnType;
+    }
 }

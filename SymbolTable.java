@@ -101,4 +101,12 @@ class ClassInfo{
     public MethodInfo getMethod(String mname,int argCount){
         return methods.get(mname+"/"+argCount);
     }
+    //helper to get method by name
+    public MethodInfo MethodName(String mname){
+        for(MethodInfo mi:methods.values()){
+            if(mi.name.equals(mname))
+                return mi;
+        }
+        return null;
+    }
 }
