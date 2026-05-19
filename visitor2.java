@@ -59,6 +59,18 @@ public class visitor2 extends GJDepthFirst<String, Void>{
         return null;
     }
     @Override
+    public String visit(ArrayType n, Void argu) {
+        return "int[]";
+    }
+    @Override
+    public String visit(BooleanType n, Void argu) {
+        return "boolean";
+    }
+    @Override
+    public String visit(IntegerType n, Void argu) {
+        return "int";
+    }
+    @Override
     public String visit(IntegerLiteral n,Void argu) {
         return "int";
     }
@@ -201,6 +213,9 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     @Override
     public String visit(Identifier n,Void argu)throws Exception{
         String name = n.f0.toString();
+
+        if(symbolTable.classExists(name))
+            return name;
         //look in current method vars and parameters
         if(currentMethod!=null){
             ClassInfo ci=symbolTable.getClass(currentClass);

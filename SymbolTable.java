@@ -89,9 +89,11 @@ class ClassInfo{
         throw new Exception("Field '"+nname+ "'already exists in class'"+name);
         fields.put(nname,ntype);
     }
-    //add a new method
-    public void addMethod(String nname,MethodInfo info){
-        methods.put(nname+"/"+info.paramTypes.size(),info);
+    public void addMethod(String nname, MethodInfo info) throws Exception {
+        String key = nname + "/" + info.paramTypes.size();
+        if (methods.containsKey(key))
+            throw new Exception("Method '" + nname + "' with " + info.paramTypes.size() + " args already declared in class '" + name + "'");
+        methods.put(key, info);
     }
     //find fieldtype  by name
     public String getFieldType(String fname){

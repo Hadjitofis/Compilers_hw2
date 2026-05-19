@@ -81,11 +81,20 @@ public class visitor1 extends GJDepthFirst<String,Void>{
         if(n.f4.present())
         n.f4.accept(this,null);
 
-        //add method to class
         symbolTable.getClass(currentClass).addMethod(name,MI);
-        //visit variables
+
+        ClassInfo parent = symbolTable.getClass(symbolTable.getClass(currentClass).parent);
+        while(parent!=null){
+            MethodInfo parentMethod=parent.getMethod(name,MI.paramTypes.size());
+            if(parentMethod!=null){
+                if(!MI.returnType.equals(parentMethod.returnType))
+                    throw new Exception("Override of '"+name+"' in '"+currentClass+"' has mismatched return type");
+                break;
+            }
+            parent=parent.parent!=null?symbolTable.getClass(parent.parent):null;
+        }
+
         n.f7.accept(this,null);
-        //reset
         currentMethod=null;
         currentMethodInfo=null;
         return null;
