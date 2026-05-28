@@ -42,8 +42,10 @@ public class visitor1 extends GJDepthFirst<String,Void>{
     @Override
     public String visit(ClassExtendsDeclaration n,Void argu) throws Exception{
         String classname=n.f1.accept(this,null);
-        //parent is now in f3
-        symbolTable.addClass(classname,n.f3.accept(this,null));
+        String parentname=n.f3.accept(this,null);
+        if(!symbolTable.classExists(parentname))
+            throw new Exception("Parent class '"+parentname+"' must be declared before '"+classname+"'");
+        symbolTable.addClass(classname,parentname);
         currentClass=classname;
 
         //fields are in f5,6

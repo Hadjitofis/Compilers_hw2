@@ -158,6 +158,10 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     }
     
     @Override
+    public String visit(BracketExpression n, Void argu) throws Exception {
+        return n.f1.accept(this, null);
+    }
+    @Override
     public String visit(ArrayAllocationExpression n,Void argu)throws Exception{
         return n.f0.accept(this,argu);
     }
@@ -214,8 +218,6 @@ public class visitor2 extends GJDepthFirst<String, Void>{
     public String visit(Identifier n,Void argu)throws Exception{
         String name = n.f0.toString();
 
-        if(symbolTable.classExists(name))
-            return name;
         //look in current method vars and parameters
         if(currentMethod!=null){
             ClassInfo ci=symbolTable.getClass(currentClass);
@@ -234,11 +236,13 @@ public class visitor2 extends GJDepthFirst<String, Void>{
             //move to parent
             if (classi.parent != null)
                 classi = symbolTable.getClass(classi.parent);
-            else 
+            else
                 classi = null;
-            
-            }
-        throw new Exception("Variable not declared");
+        }
+        //fall back to class name (e.g. used as a type identifier)
+        if(symbolTable.classExists(name))
+            return name;
+        throw new Exception("Variable '"+name+"' not declared");
     }
     @Override
     public String visit(MessageSend n, Void argu) throws Exception{
