@@ -39,9 +39,9 @@ For every class, the program prints the memory offset of each field and method:
 javac -cp . syntaxtree/*.java visitor/*.java SymbolTable.java visitor1.java visitor2.java Main.java
 
 ## Run
-
+```
 java Main <file1> <file2> ...
-
+```
 ## Example
 ```
 Input:
