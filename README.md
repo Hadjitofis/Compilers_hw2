@@ -43,7 +43,7 @@ javac -cp . syntaxtree/*.java visitor/*.java SymbolTable.java visitor1.java visi
 java Main <file1> <file2> ...
 
 ## Example
-
+```
 Input:
 class A {
     int i;
@@ -64,7 +64,8 @@ class B extends A {
     public int foo(int i, int j) { return i+j; }
     public int foobar(boolean k){ return 1; }
 }
-
+```
+```
 Output:
 A.i : 0
 A.a : 4
@@ -72,3 +73,4 @@ A.foo : 0
 A.bar : 8
 B.i : 12
 B.foobar : 16
+```
